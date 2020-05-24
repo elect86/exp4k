@@ -26,9 +26,9 @@ object ShuntingYard {
         val output = ArrayList<Token>()
         val functions = mutableMapOf<String, Function>()
         val operators = mutableMapOf<String, Operator>()
-        val variables = hashSetOf<String>()
-        for(p in parameters) {
-            when(p) {
+        val variables = hashSetOf("pi", "π", "φ", "e")
+        for (p in parameters) {
+            when (p) {
                 is Function -> functions[p.name] = p
                 is String -> variables += p
                 is Operator -> operators[p.symbol] = p

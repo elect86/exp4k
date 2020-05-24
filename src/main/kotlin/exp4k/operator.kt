@@ -67,6 +67,7 @@ enum class Precedence(val i: Int) {
     subtraction(0);
 
     operator fun plus(int: Int) = i + int
+    operator fun minus(int: Int) = i - int
 }
 
 object Operators {

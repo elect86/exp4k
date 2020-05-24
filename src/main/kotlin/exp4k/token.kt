@@ -190,9 +190,7 @@ class Tokenizer(
  *  @author Bartosz Firyn (sarxos) */
 class UnknownFunctionOrVariableException(expression: String, position: Int, length: Int) :
     IllegalArgumentException() {
-
-    val token = expression.substring(position, length - 1) // TODO check
-
+    val token = expression.substring(position, length)
     override val message = "Unknown function or variable '$token' at pos $position in expression '$expression'"
 }
 

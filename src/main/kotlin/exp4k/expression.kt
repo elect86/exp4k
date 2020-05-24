@@ -34,10 +34,9 @@ internal constructor(
         variables["e"] = Math.E
     }
 
-    fun setVariable(name: String, value: Double): Expression {
+    operator fun set(name: String, value: Number) {
         checkVariableName(name)
         variables[name] = value
-        return this
     }
 
     private fun checkVariableName(name: String) {
@@ -46,17 +45,13 @@ internal constructor(
         }
     }
 
-    fun setVariables(variables: Map<String, Double>): Expression {
-        for ((key, value) in variables)
-            setVariable(key, value)
-        return this
-    }
+//    fun setVariables(variables: Map<String, Double>): Expression {
+//        for ((key, value) in variables)
+//            setVariable(key, value)
+//        return this
+//    }
 
     fun clearVariables() {
-        x = null
-        y = null
-        z = null
-        w = null
         variables.clear()
         addConstants()
     }
@@ -110,11 +105,8 @@ internal constructor(
     /** check that all vars have a value set */
     fun isComplete(errors: ArrayList<String>? = null): Boolean {
         tokens.filterIsInstance<Token.Variable>().forEach {
-            val name = it.name
-            if (name !in variables || (name == "x" && x == null) || (name == "y" && y == null)
-                || (name == "z" && z == null) || (name == "w" && w == null)
-            ) {
-                errors?.add("The variable '$name' has not been set")
+            if (it.name !in variables) {
+                errors?.add("The variable '${it.name}' has not been set")
                 return false
             }
         }
@@ -160,19 +152,46 @@ internal constructor(
                     val arity = t.function.arity
                     require(stack.size >= arity) { "Invalid arity number for '${t.function.name}' function" }
                     // collect the arguments from the stack
-                    stack += when (val f = t.function) {
-                        is Function0<*> -> f()
-                        is Function1<*, *> -> (f as Function1<Number, Number>)(stack.pop())
-                        is Function2<*, *, *> -> (f as Function2<Number, Number, Number>)(stack.pop(), stack.pop())
-                        is Function3<*, *, *, *> -> (f as Function3<Number, Number, Number, Number>)(stack.pop(), stack.pop(), stack.pop())
-                        is Function4<*, *, *, *, *> -> (f as Function4<Number, Number, Number, Number, Number>)(stack.pop(), stack.pop(), stack.pop(), stack.pop())
-                        is Function5<*, *, *, *, *, *> -> (f as Function5<Number, Number, Number, Number, Number, Number>)(stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop())
-                        is Function6<*, *, *, *, *, *, *> -> (f as Function6<Number, Number, Number, Number, Number, Number, Number>)(stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop())
-                        is Function7<*, *, *, *, *, *, *, *> -> (f as Function7<Number, Number, Number, Number, Number, Number, Number, Number>)(stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop())
-                        is Function8<*, *, *, *, *, *, *, *, *> -> (f as Function8<Number, Number, Number, Number, Number, Number, Number, Number, Number>)(stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop())
-                        is Function9<*, *, *, *, *, *, *, *, *, *> -> (f as Function9<Number, Number, Number, Number, Number, Number, Number, Number, Number, Number>)(stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop(), stack.pop())
+                    val l = stack.lastIndex
+                    val func = t.function
+                    val res = when (func) {
+                        is Function0<*> -> func()
+                        is Function1<*, *> -> (func as Function1<Number, Number>)(stack[l])
+                        is Function2<*, *, *> -> (func as Function2<Number, Number, Number>)(stack[l - 1], stack[l])
+                        is Function3<*, *, *, *> -> (func as Function3<Number, Number, Number, Number>)(
+                            stack[l - 2], stack[l - 1], stack[l]
+                        )
+                        is Function4<*, *, *, *, *> -> (func as Function4<Number, Number, Number, Number, Number>)(
+                            stack[l - 3], stack[l - 2], stack[l - 1], stack[l]
+                        )
+                        is Function5<*, *, *, *, *, *> ->
+                            (func as Function5<Number, Number, Number, Number, Number, Number>)(
+                                stack[l - 4], stack[l - 3], stack[l - 2], stack[l - 1], stack[l]
+                            )
+                        is Function6<*, *, *, *, *, *, *> ->
+                            (func as Function6<Number, Number, Number, Number, Number, Number, Number>)(
+                                stack[l - 5], stack[l - 4], stack[l - 3], stack[l - 2], stack[l - 1], stack[l]
+                            )
+                        is Function7<*, *, *, *, *, *, *, *> ->
+                            (func as Function7<Number, Number, Number, Number, Number, Number, Number, Number>)(
+                                stack[l - 6], stack[l - 5], stack[l - 4], stack[l - 3], stack[l - 2], stack[l - 1],
+                                stack[l]
+                            )
+                        is Function8<*, *, *, *, *, *, *, *, *> ->
+                            (func as Function8<Number, Number, Number, Number, Number, Number, Number, Number, Number>)(
+                                stack[l - 7], stack[l - 6], stack[l - 5], stack[l - 4], stack[l - 3], stack[l - 2],
+                                stack[l - 1], stack[l]
+                            )
+                        is Function9<*, *, *, *, *, *, *, *, *, *> ->
+                            (func as Function9<Number, Number, Number, Number, Number, Number, Number, Number, Number, Number>)(
+                                stack[l - 8], stack[l - 7], stack[l - 6], stack[l - 5], stack[l - 4], stack[l - 3],
+                                stack[l - 2], stack[l - 1], stack[l]
+                            )
                         else -> error("invalid")
                     }
+                    // pop the arguments from the stack and push the computed result
+                    repeat(func.arity) { stack.pop() }
+                    stack += res
                 }
             }
         require(stack.size <= 1) { "Invalid number of items on the output queue. Might be caused by an invalid number of arguments for a function." }
@@ -180,8 +199,32 @@ internal constructor(
     }
 
     // builtin variables
-    var x: Number? = null
-    var y: Number? = null
-    var z: Number? = null
-    var w: Number? = null
+    var x: Number?
+        get() = variables["x"]
+        set(value) {
+            if(value != null)
+                variables["x"] = value
+            else variables -= "x"
+        }
+    var y: Number?
+        get() = variables["y"]
+        set(value) {
+            if(value != null)
+                variables["y"] = value
+            else variables -= "y"
+        }
+    var z: Number?
+        get() = variables["z"]
+        set(value) {
+            if(value != null)
+                variables["z"] = value
+            else variables -= "z"
+        }
+    var w: Number?
+        get() = variables["w"]
+        set(value) {
+            if(value != null)
+                variables["w"] = value
+            else variables -= "w"
+        }
 }
