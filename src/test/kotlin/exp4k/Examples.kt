@@ -111,5 +111,23 @@ class Examples : StringSpec() {
             e.isValid() shouldBe true
             e.isComplete() shouldBe false
         }
+
+        "Parentheses validation" {
+            shouldThrow<IllegalArgumentException> { Expression("(0.14-1.5) / ((1/600) ^ 0.02)-1)") }
+        }
+
+        "Concatenation of builtin functions" {
+            val e = Expression("sincos(x)")
+            e.isValid() shouldBe true
+        }
+
+        "invalid expression" {
+            shouldThrow<IllegalArgumentException> { Expression("x+cos9y)") }
+        }
+
+        "incorrect result" {
+            val e = Expression("sin(x) - (0.02449*x^3)-(1.67049*x)+(64.85606+(0.33683*x^2))+(sin (2*x))")
+            e(x = 1) shouldBe 65.24867841163359
+        }
     }
 }

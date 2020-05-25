@@ -24,7 +24,7 @@ class TokenizerTest : StringSpec() {
                 is Operator -> nextToken!! shouldBeOperator arg
                 is String -> when (val token = nextToken!!) {
                     is Token.Function -> {
-                        val func = Functions[arg]!!
+                        val func = functions[arg]!!
                         token.function.name shouldBe func.name
                         token.function.arity shouldBe func.arity
                     }
@@ -152,6 +152,12 @@ class TokenizerTest : StringSpec() {
         "Tokenization22" {
             Tokenizer("--2 * (-14)").doesMatch(
                 unaryMinus, unaryMinus, 2, multiplication, Token.OpenParentheses, unaryMinus, 14, Token.CloseParentheses
+            )
+        }
+
+        "Tokenization23" {
+            Tokenizer("sincos(x)").doesMatch(
+                "sin", "cos", Token.OpenParentheses, "x", Token.CloseParentheses
             )
         }
     }

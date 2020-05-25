@@ -20,7 +20,7 @@ class ExpressionTest : StringSpec() {
         "Expression, 2" {
             val tokens = arrayOf(
                 Token.Number(1.0),
-                Token.Function(Functions["ln"]!!)
+                Token.Function(functions["ln"]!!)
             )
             Expression(tokens)() shouldBeDouble 0.0
         }

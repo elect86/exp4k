@@ -110,7 +110,7 @@ class Tokenizer(
         return lastToken!!
     }
 
-    private fun getFunction(name: String): Function? = userFunctions[name] ?: Functions[name]
+    private fun getFunction(name: String): Function? = userFunctions[name] ?: functions[name]
 
     private fun parseOperatorToken(firstChar: Char): Token? {
         val offset = pos

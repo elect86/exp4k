@@ -40,7 +40,7 @@ internal constructor(
     }
 
     private fun checkVariableName(name: String) {
-        require(name !in userFunctionNames && Functions[name] == null) {
+        require(name !in userFunctionNames && functions[name] == null) {
             "The variable name '$name' is invalid. Since there exists a function with the same name"
         }
     }

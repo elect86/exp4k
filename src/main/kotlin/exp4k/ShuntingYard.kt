@@ -63,8 +63,10 @@ object ShuntingYard {
                 }
                 Token.OpenParentheses -> stack += token
                 Token.CloseParentheses -> {
-                    while (stack.peek() !is Token.OpenParentheses)
+                    while (stack.peek() !is Token.OpenParentheses) {
                         output += stack.pop()
+                        require(stack.isNotEmpty()) { "Mismatched parentheses detected. Please check the expression" }
+                    }
                     stack.pop()
                     if (stack.isNotEmpty() && stack.peek() is Token.Function)
                         output += stack.pop()
